@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Love.css</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#000;overflow:hidden;font-family:Georgia,serif;color:#fff}
+
+/* ---------- loader card ---------- */
+.card{position:fixed;left:50%;top:50%;width:min(78vw,300px);padding:26px 22px 22px;z-index:10;
+  transform:translate(-50%,-50%);text-align:center;border-radius:20px;
+  background:radial-gradient(circle at 0 0,rgba(130,10,45,.4),transparent 55%),rgba(18,10,14,.88);
+  border:1px solid rgba(255,255,255,.07);box-shadow:0 0 40px rgba(220,20,80,.12);
+  transition:opacity .6s,transform .6s}
+.card.hide{opacity:0;transform:translate(-50%,-50%) scale(.94);pointer-events:none}
+.card .em{font-size:34px}
+.card h1{font-size:24px;margin:8px 0 16px}
+.track{height:4px;border-radius:4px;background:#2a1a22;overflow:hidden}
+#bar{height:100%;width:0;background:linear-gradient(90deg,#ff2d6f,#e8105a);transition:width .18s}
+#status{margin:10px 0 16px;font:11px ui-monospace,Menlo,Consolas,monospace;color:#9d9096}
+#go{width:100%;padding:12px;border:0;border-radius:10px;font:700 12px Arial,sans-serif;
+  letter-spacing:.12em;background:#26202a;color:#5d5560;transition:.3s}
+#go:not(:disabled){background:#e8105a;color:#fff;box-shadow:0 0 18px rgba(232,16,90,.55);cursor:pointer}
+
+/* ---------- stage ---------- */
+#stage{position:fixed;inset:0;overflow:hidden}
+@keyframes fadeIn{to{opacity:1}}
+.glow{position:absolute;inset:0;opacity:0;
+  background:radial-gradient(ellipse 55% 34% at 50% 40%,rgba(200,10,50,.5),rgba(90,0,20,.25) 45%,transparent 72%)}
+.go .glow{animation:fadeIn 3s 2.2s both}
+
+.plant{position:absolute;left:50%;bottom:24vh;width:0;height:300px;
+  transform:scale(var(--k,1));transform-origin:50% 100%;perspective:800px;perspective-origin:0 10px}
+
+/* stem + leaves */
+.stem{position:absolute;left:-4px;bottom:0;width:8px;height:284px;border-radius:4px;
+  transform-origin:50% 100%;background:linear-gradient(90deg,#0d3a1a,#2f8f45 50%,#0d3a1a);transform:scaleY(0)}
+.go .stem{animation:grow 2.2s cubic-bezier(.3,.7,.2,1) both}
+@keyframes grow{to{transform:scaleY(1)}}
+.leaf{position:absolute;width:58px;height:26px;background:linear-gradient(135deg,#46b35a,#14602a);
+  box-shadow:inset 0 -3px 6px rgba(0,0,0,.35);transform:scale(0) rotate(var(--rot))}
+.leaf.l{right:4px;bottom:110px;border-radius:100% 0 100% 0;transform-origin:100% 0;--rot:-8deg}
+.leaf.r{left:4px;bottom:160px;border-radius:0 100% 0 100%;transform-origin:0 0;--rot:8deg}
+.go .leaf{animation:leaf 1s ease-out both}
+.go .leaf.l{animation-delay:1.3s}
+.go .leaf.r{animation-delay:1.6s}
+@keyframes leaf{to{transform:scale(1) rotate(var(--rot))}}
+.calyx{position:absolute;left:-13px;top:0;width:26px;height:16px;border-radius:50% 50% 60% 60%;
+  background:linear-gradient(#58c46a,#176a2c);transform:scale(0)}
+.go .calyx{animation:pop .7s 2s ease-out both,hide .8s 4.4s forwards}
+@keyframes hide{to{opacity:0}}
+@keyframes pop{to{transform:scale(1)}}
+
+/* ---------- the rose (3D petals) ---------- */
+.rose{position:absolute;left:0;top:6px;width:0;height:0;transform-style:preserve-3d;transform:rotateX(-30deg)}
+.petal{position:absolute;left:0;top:0;opacity:0;transform-origin:50% 100%;
+  border-radius:50% 50% 44% 44%/58% 58% 42% 42%;
+  box-shadow:inset 0 -12px 22px rgba(35,0,8,.6),inset 0 8px 14px rgba(255,110,140,.22)}
+.go .petal{animation:bloom var(--bloom) cubic-bezier(.22,.8,.24,1) calc(2.3s + var(--delay)) both}
+/* --r: distance from centre | --c: closed tilt (inward) | --o: open tilt (outward) */
+.outer{--r:30px;--c:12deg;--o:-74deg;background:radial-gradient(120% 95% at 50% 100%,#5a0013,#a30b2c 40%,#d9163f 80%,#f2506f)}
+.mid{--r:22px;--c:10deg;--o:-54deg;background:radial-gradient(120% 95% at 50% 100%,#4d0010,#92092a 40%,#c8123a 82%,#e5405f)}
+.inner{--r:15px;--c:8deg;--o:-36deg;background:radial-gradient(120% 95% at 50% 100%,#430010,#800722 45%,#b60f35 85%,#d83857)}
+.core{--r:9px;--c:6deg;--o:-18deg;background:radial-gradient(120% 95% at 50% 100%,#3a000d,#6f061d 50%,#a00c2e)}
+.heart{--r:3px;--c:4deg;--o:-6deg;background:radial-gradient(120% 95% at 50% 100%,#2f0009,#5e041a 55%,#8d0a28)}
+@keyframes bloom{
+  0%{opacity:0;transform:rotateY(var(--angle)) translateZ(var(--r)) rotateX(var(--c)) rotateY(calc(var(--yaw)*.4)) scale(.1)}
+  22%{opacity:1;transform:rotateY(var(--angle)) translateZ(var(--r)) rotateX(var(--c)) rotateY(calc(var(--yaw)*.4)) scale(calc(var(--scale)*.72))}
+  100%{opacity:1;transform:rotateY(var(--angle)) translateZ(var(--r)) rotateX(calc(var(--o) + var(--curl))) rotateY(var(--yaw)) scale(var(--scale))}}
+
+/* ---------- falling petals + caption ---------- */
+.drop{position:absolute;width:8px;height:12px;border-radius:70% 30% 70% 30%;background:#a50d2e;
+  opacity:0;animation:fall linear infinite}
+@keyframes fall{0%{opacity:0;transform:translate(0,0) rotate(0)}15%{opacity:.9}
+  100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot))}}
+.say{position:absolute;left:0;right:0;bottom:5vh;padding:0 14vw;text-align:center;opacity:0;pointer-events:none;
+  font-style:italic;font-size:19px;line-height:1.5;letter-spacing:.06em;color:#d9a0b4}
+.go .say{animation:fadeIn 2s 6s both}
+#open{display:block;margin:14px auto 0;padding:10px 20px;border:1px solid rgba(232,16,90,.65);
+  border-radius:999px;background:rgba(232,16,90,.14);color:#ffd6e2;font:600 13px Arial,sans-serif;
+  letter-spacing:.06em;cursor:pointer;box-shadow:0 0 16px rgba(232,16,90,.3);
+  opacity:0;visibility:hidden;pointer-events:auto}
+.go #open{animation:showBtn 1.4s 7s both}
+@keyframes showBtn{0%{opacity:0;visibility:hidden}1%{visibility:visible}100%{opacity:1;visibility:visible}}
+
+/* ---------- the letter ---------- */
+#letter{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.78);opacity:0;visibility:hidden;transition:opacity .5s,visibility .5s}
+#letter.open{opacity:1;visibility:visible}
+.paper{position:relative;width:min(90vw,380px);max-height:80vh;overflow:auto;padding:28px 24px;border-radius:6px;
+  background:repeating-linear-gradient(#f8eee0 0 27px,#e9d7bf 27px 28px);background-attachment:local;color:#3a2428;
+  box-shadow:0 20px 60px rgba(0,0,0,.7),0 0 40px rgba(232,16,90,.18);
+  transform:translateY(40px) scale(.96);transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+#letter.open .paper{transform:none}
+.paper p{font:17px/28px Georgia,'Noto Naskh Arabic','Amiri','Geeza Pro',Tahoma,serif;white-space:pre-wrap}
+.paper .to{font-weight:700;font-size:20px}
+.paper .rest{opacity:0}
+.paper .from{margin-top:14px;text-align:end;font-weight:700;opacity:0;transition:opacity 1s}
+.paper .from.show{opacity:1}
+.x{position:absolute;top:14px;right:14px;width:40px;height:40px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:#fff;font-size:18px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <div class="em">🌹</div>
+  <h1>Love.css</h1>
+  <div class="track"><div id="bar"></div></div>
+  <div id="status">Growing digital petals ...</div>
+  <button id="go" disabled>TAP TO BLOOM</button>
+</div>
+
+<div id="stage">
+  <div class="glow"></div>
+  <div class="plant" id="plant">
+    <div class="stem"></div>
+    <div class="leaf l"></div>
+    <div class="leaf r"></div>
+    <div class="calyx"></div>
+    <div class="rose" id="rose"></div>
+  </div>
+  <div class="say">i coded this for you<button id="open">💌 Read my letter</button></div>
+</div>
+
+<div id="letter">
+  <button class="x" id="close" aria-label="Close">✕</button>
+  <div class="paper" id="paper">
+    <p class="to" id="to" dir="auto"></p>
+    <p class="body" id="body" dir="auto"><span id="typed"></span><span class="rest" id="rest"></span></p>
+    <p class="from" id="from" dir="auto"></p>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   ✍️  WRITE YOUR LETTER HERE
+   Change the text between the quotes / backticks.
+   You can write as many lines as you want in "body".
+   ========================================================= */
+const LETTER = {
+  to:   'حب عمري حياتي يا قلبيي يا روح عمر حموديديديييييي 🥹🥹🥹',
+  body: `و ربيي اني منجنننن فرح ياخي اكتبلك الرساله ذي من اطياز قلبيي ياخي و ربي انك افضل انسانه ف ذا الكوكب ياخي و بمناسبة ذا اليوم الجميل و انتي الاجمل طبعا هيهيهيهيي صخصرنصنص حايب اقولك انو انا محضوص بيوم الجمعه ذاك ف يوم 22 ماي انو التقيتك يا ربيي و اقذر اقول و انا واثق 100 ف الميه انو افضل اشي صارلي ذا العام و ممتن للجنون انوووو التقييتكككك انتييي يا روح قلبييييييي و كان ذاك افضل يوم يا حب عموريييريريييي
+
+و تددري اني اعشكقكقكقكك و اهيمك و احبكبكبكبكككك و اعيش فيككييي يا ربيي اقسم بالله يا عيوني كل ما تروحي للمدرسه و اقعد استناك ياخي بشوووققققق مو طبعيعييي يا ربيييي و افرح فرح مو طبعيعيي يا ربي لما تجي و ما تتخيلي فرحتي لما تقولي اني جبت علامه كامله ف اي ماده ياخي و ربييي افرحححح عشانك شطورتييييييي و قمريييي يا ربييييي
+
+و في مقوله تقول و كل عين تراك فيها ليتها عيني و ربيييي منجدجدجدد اههخخخ باذن الله يا روح قلبييي يا روح قلبب حموديديدييييي انتييي تروحييي للجامعه و انا استقر باذن الله و نتزوج و نعيشش افضل ايامنا مع بعضضصضض و نكون حياة مرررره مرررره جميله زيك يا نور قلبييي 🥹🥹🥹
+
+انتي روح قلبييي و حياتيتييي و قمريريرييي يا نور عيوينينييييي احبك للابد و بقعد احبك مهما حييت يا قمريريريي يا فؤادي اعشقك يا نور عيونيينينييي و باذن الله نتزوججججج يا حبيبتيتيتيتييييسيسي 🥹💜💙`,
+  from: ''   // your name goes here (leave empty for no signature)
+};
+/* ========================================================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+  const stage = document.getElementById('stage');
+  const rose = document.getElementById('rose');
+  const plant = document.getElementById('plant');
+  const card = document.getElementById('card');
+  const bar = document.getElementById('bar');
+  const status = document.getElementById('status');
+  const btn = document.getElementById('go');
+
+  // fit the plant to any screen
+  plant.style.setProperty('--k', Math.min(1, innerWidth / 380, innerHeight / 700));
+
+  const PETAL_LAYERS = [
+    { cls: 'outer', count: 7, w: 92, h: 104, delayBase: 0.00 },
+    { cls: 'mid',   count: 6, w: 80, h: 92,  delayBase: 0.35 },
+    { cls: 'inner', count: 5, w: 64, h: 76,  delayBase: 0.70 },
+    { cls: 'core',  count: 4, w: 46, h: 58,  delayBase: 1.05 },
+    { cls: 'heart', count: 3, w: 30, h: 42,  delayBase: 1.40 }
+  ];
+
+  function createPetals() {
+    PETAL_LAYERS.forEach((layer, li) => {
+      const angleStep = 360 / layer.count;
+      const layerOffset = li * 24 + (Math.random() - 0.5) * 8;
+
+      for (let i = 0; i < layer.count; i++) {
+        const petal = document.createElement('div');
+        petal.className = `petal ${layer.cls}`;
+
+        const angle = layerOffset + i * angleStep + (Math.random() - 0.5) * 5;
+        const delay = layer.delayBase + i * 0.05;
+        const curlJitter = (Math.random() - 0.5) * 6;
+        const scaleJitter = 0.94 + Math.random() * 0.12;
+        const bloomDur = 2.1 + Math.random() * 0.4;
+        const yaw = (i % 2 ? 1 : -1) * (11 + Math.random() * 6);
+
+        petal.style.width = `${layer.w}px`;
+        petal.style.height = `${layer.h}px`;
+        petal.style.marginLeft = `${-layer.w / 2}px`;
+        petal.style.marginTop = `${-layer.h}px`;
+        petal.style.setProperty('--angle', `${angle}deg`);
+        petal.style.setProperty('--delay', `${delay}s`);
+        petal.style.setProperty('--curl', `${curlJitter}deg`);
+        petal.style.setProperty('--scale', scaleJitter);
+        petal.style.setProperty('--bloom', `${bloomDur}s`);
+        petal.style.setProperty('--yaw', `${yaw}deg`);
+        rose.appendChild(petal);
+      }
+    });
+  }
+
+  function makeDrops() {
+    for (let i = 0; i < 18; i++) {
+      const d = document.createElement('i');
+      d.className = 'drop';
+      d.style.cssText = `left:${30 + Math.random() * 40}%;top:${16 + Math.random() * 26}%;` +
+        `--dx:${(Math.random() - 0.5) * 90}px;--dy:${120 + Math.random() * 180}px;` +
+        `--rot:${Math.random() * 360}deg;animation-duration:${6 + Math.random() * 5}s;` +
+        `animation-delay:${4.2 + Math.random() * 7}s`;
+      stage.appendChild(d);
+    }
+  }
+
+  // fake loader, then enable the button
+  let p = 0;
+  const timer = setInterval(() => {
+    p = Math.min(100, p + Math.random() * 9 + 3);
+    bar.style.width = p + '%';
+    if (p >= 100) {
+      clearInterval(timer);
+      status.textContent = 'Ready to bloom!';
+      btn.disabled = false;
+    }
+  }, 180);
+
+  btn.addEventListener('click', () => {
+    card.classList.add('hide');
+    setTimeout(() => { stage.classList.add('go'); makeDrops(); }, 700);
+  });
+
+  // ---------- letter ----------
+  const letterEl = document.getElementById('letter');
+  const paperEl = document.getElementById('paper');
+  const toEl = document.getElementById('to');
+  const typedEl = document.getElementById('typed');
+  const restEl = document.getElementById('rest');
+  const fromEl = document.getElementById('from');
+  const text = LETTER.body.trim();
+  const chars = Array.from(text);      // keeps emoji and Arabic letters intact
+  let typer;
+
+  function openLetter() {
+    toEl.textContent = LETTER.to;
+    fromEl.textContent = LETTER.from;
+    fromEl.style.display = LETTER.from ? '' : 'none';
+    fromEl.classList.remove('show');
+    typedEl.textContent = '';
+    restEl.textContent = text;
+    paperEl.scrollTop = 0;
+    letterEl.classList.add('open');
+
+    let i = 0;
+    const step = Math.max(14, Math.min(45, 14000 / chars.length)); // long letters type faster
+    clearInterval(typer);
+    typer = setInterval(() => {
+      i++;
+      typedEl.textContent = chars.slice(0, i).join('');
+      restEl.textContent = chars.slice(i).join('');
+      follow();
+      if (i >= chars.length) finishLetter();
+    }, step);
+  }
+  function follow() {                  // scroll along with the typing on long letters
+    const rects = typedEl.getClientRects();
+    if (!rects.length) return;
+    const bottom = rects[rects.length - 1].bottom;
+    const box = paperEl.getBoundingClientRect();
+    if (bottom > box.bottom - 24) paperEl.scrollTop += bottom - box.bottom + 48;
+  }
+  function finishLetter() {            // tap the paper to skip the typing
+    clearInterval(typer);
+    typedEl.textContent = text;
+    restEl.textContent = '';
+    fromEl.classList.add('show');
+  }
+  function closeLetter() {
+    clearInterval(typer);
+    letterEl.classList.remove('open');
+  }
+
+  document.getElementById('open').addEventListener('click', openLetter);
+  document.getElementById('paper').addEventListener('click', finishLetter);
+  document.getElementById('close').addEventListener('click', e => { e.stopPropagation(); closeLetter(); });
+  letterEl.addEventListener('click', e => { if (e.target === letterEl) closeLetter(); });
+
+  createPetals();
+});
+</script>
+</body>
+</html>
